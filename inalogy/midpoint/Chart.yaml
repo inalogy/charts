@@ -1,0 +1,31 @@
+annotations:
+  category: IDM
+apiVersion: v2
+appVersion: 4.6.0
+dependencies:
+  - condition: postgresql.enabled
+    name: postgresql
+    repository: https://charts.bitnami.com/bitnami
+    version: 14.x.x
+  - name: common
+    repository: https://charts.inalogy.com/inalogy
+    tags:
+      - inalogy-common
+    version: 2.x.x
+description: Evolveum midPoint is a comprehensive Identity Governance and Administration (IGA) platform. It is used by the organizations around the world to deal with Identity Provisioning, Identity Governance & Compliance and also Access Management. As for the identity being a security perimeter, midPoint keeps safe both organization’s internal network and external resources.
+engine: gotpl
+home: https://github.com/inalogy/charts/tree/main/inalogy/midpoint
+icon: https://inalogy.com/assets/stacks/midpoint/img/midpoint-stack-220x234.png
+keywords:
+  - midpoint
+  - identity
+  - idm
+  - iga
+maintainers:
+  - name: Inalogy
+    url: https://github.com/inalogy/charts
+name: midpoint
+sources:
+  - https://github.com/inalogy/containers/tree/main/inalogy/midpoint
+  - https://github.com/evolveum/midpoint
+version: 1.0.0
