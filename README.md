@@ -25,19 +25,10 @@ Since the container image is an immutable artifact that is already analyzed, as 
 
 ### Prerequisites
 
-- Kubernetes 1.19+
+- Kubernetes 1.22+
 - Helm 3.2.0+
 
 ### Setup a Kubernetes Cluster
-
-The quickest way to setup a Kubernetes cluster to install Inalogy Charts is following the "Inalogy Get Started" guides for the different services:
-
-- [Get Started with Inalogy Charts using VMware Tanzu Kubernetes Grid](https://docs.inalogy.com/kubernetes/get-started-tkg/)
-- [Get Started with Inalogy Charts using VMware Tanzu Mission Control](https://docs.inalogy.com/tutorials/tanzu-mission-control-get-started/)
-- [Get Started with Inalogy Charts using the Azure Kubernetes Service (AKS)](https://docs.inalogy.com/kubernetes/get-started-aks/)
-- [Get Started with Inalogy Charts using the Amazon Elastic Container Service for Kubernetes (EKS)](https://docs.inalogy.com/kubernetes/get-started-eks/)
-- [Get Started with Inalogy Charts using the Google Kubernetes Engine (GKE)](https://docs.inalogy.com/kubernetes/get-started-gke/)
-- [Get Started with Inalogy Charts using the IBM Cloud Kubernetes Service (IKS)](https://docs.inalogy.com/kubernetes/get-started-charts-iks/)
 
 For setting up Kubernetes on other cloud platforms or bare-metal servers refer to the Kubernetes [getting started guide](https://kubernetes.io/docs/getting-started-guides/).
 
@@ -54,12 +45,6 @@ The following command allows you to download and install all the charts from thi
 ```bash
 $ helm repo add inalogy https://charts.inalogy.com/inalogy
 ```
-
-> **_NOTE:_** It is important to note that the above mentioned repo is truncated so it only contains entries for the releases produced in the last 6 months. In case you need a full index, you can use it from the [archive-full-index branch](https://raw.githubusercontent.com/inalogy/charts/archive-full-index/inalogy/index.yaml) in the inalogy/charts Github repository.
->
-> This full index is updated every time the [truncated index file](https://raw.githubusercontent.com/inalogy/charts/index/inalogy/index.yaml) is updated. Take into account that this full index is under the [Github's rate limits](https://docs.github.com/en/developers/apps/building-github-apps/rate-limits-for-github-apps).
->
-> You can find more information in the [Inalogy index FAQ](https://github.com/inalogy/charts/issues/10833) pinned issue.
 
 ### Using Helm
 

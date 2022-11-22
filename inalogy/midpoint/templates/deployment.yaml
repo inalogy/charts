@@ -62,47 +62,53 @@ spec:
       {{- if .Values.podSecurityContext.enabled }}
       securityContext: {{- omit .Values.podSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
-      {{- if or .Values.initContainers .Values.sysctl.enabled (and .Values.volumePermissions.enabled .Values.persistence.enabled) }}
+      {{- if or .Values.initContainers .Values.configInit.enabled (and .Values.configInit.enabled .Values.persistence.enabled) }}
       initContainers:
-        {{- if .Values.sysctl.enabled }}
-        ## Image that performs the sysctl operation to modify Kernel settings (needed sometimes to avoid boot errors)
-        - name: sysctl
-          image: {{ include "midpoint.sysctl.image" . }}
-          imagePullPolicy: {{ .Values.sysctl.image.pullPolicy | quote }}
-          command:
-            - /bin/bash
-            - -ec
-            - |
-              {{- include "midpoint.sysctl.ifLess" (dict "key" "vm.max_map_count" "value" "262144") | nindent 14 }}
-              {{- include "midpoint.sysctl.ifLess" (dict "key" "fs.file-max" "value" "65536") | nindent 14 }}
-          securityContext:
-            privileged: true
-            runAsUser: 0
-          {{- if .Values.sysctl.resources }}
-          resources: {{- toYaml .Values.sysctl.resources | nindent 12 }}
-          {{- end }}
-        {{- end }}
-        {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
-        - name: volume-permissions
-          image: {{ include "midpoint.volumePermissions.image" . }}
-          imagePullPolicy: {{ .Values.volumePermissions.image.pullPolicy | quote }}
-          command:
-            - /bin/bash
-          args:
-            - -ec
-            - |
-              mkdir -p /inalogy/midpoint
-              chmod 700 /inalogy/midpoint
-              find /inalogy/midpoint -mindepth 1 -maxdepth 1 -not -name ".snapshot" -not -name "lost+found" | xargs -r chown -R {{ .Values.containerSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }}
-          {{- if .Values.volumePermissions.containerSecurityContext.enabled }}
-          securityContext: {{- omit .Values.volumePermissions.containerSecurityContext "enabled" | toYaml | nindent 12 }}
-          {{- end }}
-          {{- if .Values.volumePermissions.resources }}
-          resources: {{- toYaml .Values.volumePermissions.resources | nindent 12 }}
-          {{- end }}
+        {{- if .Values.configInit.enabled }}
+        ## Image that performs midpoint initialization 
+        - name: mp-config-init
+          image: {{ include "midpoint.configInit.image" . }}
+          imagePullPolicy: {{ .Values.configInit.image.pullPolicy | quote }}
+          command: ["/bin/bash","/opt/midpoint/bin/midpoint.sh","init-native"]
+          env:
+            - name: MP_INIT_CFG
+              value: /opt/mp-home
+            - name: MP_PW_DEF
+              value: /opt/mp-home/keystorepw
+            - name: MP_KEYSTORE
+              value: /opt/mp-home/keystore.jceks
+            - name: MP_CERT
+              value: |
+                -----BEGIN CERTIFICATE-----
+                MIIDxDCCAqygAwIBAgIUfImu6HQ145sOn1ra6pYn9KgIQzkwDQYJKoZIhvcNAQEL
+                BQAwFDESMBAGA1UEAwwJZGVtbyBjZXJ0MB4XDTIyMDIyMjA5MDQ1M1oXDTMyMDIy
+                MDA5MDQ1M1owFDESMBAGA1UEAwwJZGVtbyBjZXJ0MIIBIjANBgkqhkiG9w0BAQEF
+                AAOCAQ8AMIIBCgKCAQEAu4k5OzoZdBuBlc6ZVp3uwhiQi2sfRRPU8dzTATb6zN/W
+                7Fn3mBngjHRfKKNBcmKgnlIA75qziiKew75/Zis50kT5lxTcS3fVylBfkNFO1WQO
+                qg0FJBMoGPdrKRxww8XbAB5fThSNHe5ZlY0RhFX7xWSADzA7X4FzGsuou6l1xhrT
+                MNu8brfUnf6JWG019mdevclhZzKycAW70UdhAOYj7a3LPMxGev7tLQCA25LCL0Gd
+                jfZnZzkkyhYQbqkUmt6wAKmTesF3Az8uW7FKWIZ9kLkrXVP7xviGI7ga+XYrWM+Q
+                1515ecUXL3YmODn/WdFbwGSnAXl9mQIyZmNRAsHuSwIDAQABo4IBDDCCAQgwCQYD
+                VR0TBAIwADAdBgNVHQ4EFgQUTtuRHta8KDnjuGzpV8F0c/nApmwwTwYDVR0jBEgw
+                RoAUTtuRHta8KDnjuGzpV8F0c/nApmyhGKQWMBQxEjAQBgNVBAMMCWRlbW8gY2Vy
+                dIIUfImu6HQ145sOn1ra6pYn9KgIQzkwCwYDVR0PBAQDAgXgMGkGA1UdEQRiMGCC
+                GG1wLXBnLWRlbW8ubXAtZGVtby5sb2NhbIIcd3d3Lm1wLXBnLWRlbW8ubXAtZGVt
+                by5sb2NhbIIJbG9jYWxob3N0ghVsb2NhbGhvc3QubG9jYWxkb21haW6HBH8AAAEw
+                EwYDVR0lBAwwCgYIKwYBBQUHAwEwDQYJKoZIhvcNAQELBQADggEBACXhqQlHdnNF
+                XP5rHGBM98PSH7MZeavcQnBF3T4LDgCXeI++ab6sUpFaJAGdx156gd6sLr9OyV5h
+                M2CloNT0omXkJOI1uDAJyqUu9RD47NiLDf6yr9z91t4O1pAu4rcWaaKT/wqVcGda
+                WQ0mBgNgJLW+TwsT7rn93mdkhEIVXqmjhNNd6nfDdgkpozZCSPQkdt8IllKdPvrC
+                Aq4wBlDHzKSIIhnDFa0+1DUnAATY9dREARGQ5SMjFf2j5+k/mrH+vpkSx7QD0rQt
+                Rk5bDe6gVf6E1xl6s8e6Un65xncF7keoDUDHVHs6d16nhdLA2/yOMKSdic2EbfYB
+                8WjXHbt7O9M=
+                -----END CERTIFICATE-----              
           volumeMounts:
-            - name: data
-              mountPath: /inalogy/midpoint
+            - name: mp-home
+              mountPath: /opt/mp-home
+
+          {{- if .Values.configInit.resources }}
+          resources: {{- toYaml .Values.configInit.resources | nindent 12 }}
+          {{- end }}
         {{- end }}
         {{- if .Values.initContainers }}
           {{- include "common.tplvalues.render" (dict "value" .Values.initContainers "context" $) | nindent 8 }}
@@ -126,143 +132,79 @@ spec:
           args: {{- include "common.tplvalues.render" (dict "value" .Values.args "context" $) | nindent 12 }}
           {{- end }}
           env:
-            - name: INALOGY_DEBUG
-              value: {{ ternary "true" "false" (or .Values.image.debug .Values.diagnosticMode.enabled) | quote }}
-            - name: SONARQUBE_SKIP_BOOTSTRAP
-              value: {{ ternary "yes" "no" .Values.midpointSkipInstall | quote }}
-            - name: SONARQUBE_USERNAME
-              value: {{ .Values.midpointUsername | quote }}
-            - name: SONARQUBE_PASSWORD
+            - name: MP_SET_file_encoding
+              value: UTF8 
+            - name: MP_SET_midpoint_repository_database
+              value: postgresql
+            - name: MP_SET_midpoint_repository_jdbcUsername
+              value: {{ include "midpoint.database.username" . | quote }}
+            - name: MP_SET_midpoint_repository_jdbcPassword
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "midpoint.secretName" . }}
-                  key: midpoint-password
-            - name: SONARQUBE_EMAIL
-              value: {{ .Values.midpointEmail | quote }}
-            {{- if .Values.minHeapSize }}
-            - name: SONARQUBE_MIN_HEAP_SIZE
-              value: {{ .Values.minHeapSize | quote }}
-            {{- end }}
-            {{- if .Values.maxHeapSize }}
-            - name: SONARQUBE_MAX_HEAP_SIZE
-              value: {{ .Values.maxHeapSize | quote }}
-            {{- end }}
-            {{- if .Values.midpointSecurityRealm }}
-            - name: SONAR_SECURITY_REALM
-              value: {{ .Values.midpointSecurityRealm | quote }}
-            {{- end }}
-            {{- if .Values.midpointAuthenticatorDowncase }}
-            - name: SONAR_AUTHENTICATOR_DOWNCASE
-              value: {{ .Values.midpointAuthenticatorDowncase | quote }}
-            {{- end }}
-            {{- if .Values.ldap.url }}
-            - name: LDAP_URL
-              value: {{ .Values.ldap.url | quote }}
-            {{- end }}
-            {{- if .Values.ldap.bindDn }}
-            - name: LDAP_BINDDN
-              value: {{ .Values.ldap.bindDn | quote }}
-            {{- end }}
-            {{- if .Values.ldap.bindPassword }}
-            - name: LDAP_BINDPASSWORD
-              value: {{ .Values.ldap.bindPassword | quote }}
-            {{- end }}
-            {{- if .Values.ldap.authentication }}
-            - name: LDAP_AUTHENTICATION
-              value: {{ .Values.ldap.authentication | quote }}
-            {{- end }}
-            {{- if .Values.ldap.realm }}
-            - name: LDAP_REALM
-              value: {{ .Values.ldap.realm | quote }}
-            {{- end }}
-            {{- if .Values.ldap.contextFactoryClass }}
-            - name: LDAP_CONTEXTFACTORYCLASS
-              value: {{ .Values.ldap.contextFactoryClass | quote }}
-            {{- end }}
-            {{- if .Values.ldap.StartTLS }}
-            - name: LDAP_STARTTLS
-              value: {{ .Values.ldap.StartTLS | quote }}
-            {{- end }}
-            {{- if .Values.ldap.followReferrals }}
-            - name: LDAP_FOLLOWREFERRALS
-              value: {{ .Values.ldap.followReferrals | quote }}
-            {{- end }}
-            {{- if .Values.ldap.user.baseDn }}
-            - name: LDAP_USER_BASEDN
-              value: {{ .Values.ldap.user.baseDn | quote }}
-            {{- end }}
-            {{- if .Values.ldap.user.request }}
-            - name: LDAP_USER_REQUEST
-              value: {{ .Values.ldap.user.request | quote }}
-            {{- end }}
-            {{- if .Values.ldap.user.realNameAttribute }}
-            - name: LDAP_USER_REALNAMEATTRIBUTE
-              value: {{ .Values.ldap.user.realNameAttribute | quote }}
-            {{- end }}
-            {{- if .Values.ldap.user.emailAttribute }}
-            - name: LDAP_USER_EMAILATTRIBUTE
-              value: {{ .Values.ldap.user.emailAttribute | quote }}
-            {{- end }}
-            {{- if .Values.ldap.group.baseDn }}
-            - name: LDAP_GROUP_BASEDN
-              value: {{ .Values.ldap.group.baseDn | quote }}
-            {{- end }}
-            {{- if .Values.ldap.group.request }}
-            - name: LDAP_GROUP_REQUEST
-              value: {{ .Values.ldap.group.request | quote }}
-            {{- end }}
-            {{- if .Values.ldap.group.idAttribute }}
-            - name: LDAP_GROUP_IDATTRIBUTE
-              value: {{ .Values.ldap.group.idAttribute | quote }}
-            {{- end }}
-            - name: SONARQUBE_START_TIMEOUT
+                  name: {{ include "midpoint.database.secretName" . }}
+                  key: password
+            - name: MP_SET_midpoint_repository_jdbcUrl
+              value: {{ include "midpoint.database.url" . | quote }}
+            - name: MP_UNSET_midpoint_repository_hibernateHbm2ddl
+              value: "1"
+            - name: MP_NO_ENV_COMPAT
+              value: "1"
+            - name: INALOGY_DEBUG
+              value: {{ ternary "true" "false" (or .Values.image.debug .Values.diagnosticMode.enabled) | quote }}
+            - name: MP_START_TIMEOUT
               value: {{ .Values.startTimeout | quote }}
-            - name: SONARQUBE_DATABASE_HOST
+            - name: MP_DATABASE_HOST
               value: {{ include "midpoint.database.host" . | quote }}
-            - name: SONARQUBE_DATABASE_PORT_NUMBER
+            - name: MP_DATABASE_PORT_NUMBER
               value: {{ include "midpoint.database.port" . | quote }}
-            - name: SONARQUBE_DATABASE_NAME
+            - name: MP_DATABASE_NAME
               value: {{ include "midpoint.database.name" . | quote }}
-            - name: SONARQUBE_DATABASE_USER
+            - name: MP_DATABASE_USER
               value: {{ include "midpoint.database.username" . | quote }}
-            - name: SONARQUBE_DATABASE_PASSWORD
+            - name: MP_DATABASE_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ include "midpoint.database.secretName" . }}
                   key: password
             {{- if .Values.smtpHost }}
-            - name: SONARQUBE_SMTP_HOST
+            - name: MP_SMTP_HOST
               value: {{ .Values.smtpHost | quote }}
             {{- end }}
             {{- if .Values.smtpPort }}
-            - name: SONARQUBE_SMTP_PORT
+            - name: MP_SMTP_PORT
               value: {{ .Values.smtpPort | quote }}
             {{- end }}
             {{- if .Values.smtpUser }}
-            - name: SONARQUBE_SMTP_USER
+            - name: MP_SMTP_USER
               value: {{ .Values.smtpUser | quote }}
             {{- end }}
             {{- if or .Values.smtpPassword .Values.smtpExistingSecret }}
-            - name: SONARQUBE_SMTP_PASSWORD
+            - name: MP_SMTP_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ include "midpoint.smtpSecretName" . }}
                   key: smtp-password
             {{- end }}
             {{- if .Values.smtpProtocol }}
-            - name: SONARQUBE_SMTP_PROTOCOL
+            - name: MP_SMTP_PROTOCOL
               value: {{ .Values.smtpProtocol | quote }}
             {{- end }}
-            - name: SONARQUBE_PORT_NUMBER
+            - name: MP_PORT_NUMBER
               value: {{ .Values.containerPorts.http | quote }}
-            - name: SONARQUBE_ELASTICSEARCH_PORT_NUMBER
-              value: {{ .Values.containerPorts.elastic | quote }}
+            {{- if .Values.minHeapSize }}
+            - name: MP_MEM_INIT
+              value: {{ .Values.minHeapSize | quote }}
+            {{- end }}
+            {{- if .Values.maxHeapSize }}
+            - name: MP_MEM_MAX
+              value: {{ .Values.maxHeapSize | quote }}
+            {{- end }}
             {{- if .Values.extraProperties }}
-            - name: SONARQUBE_EXTRA_PROPERTIES
+            - name: MP_EXTRA_PROPERTIES
               value: {{ join "," .Values.extraProperties | quote }}
             {{- end }}
             {{- if .Values.metrics.jmx.enabled }}
-            - name: SONARQUBE_WEB_JAVA_ADD_OPTS
+            - name: MP_WEB_JAVA_ADD_OPTS
               value: "-Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=10443 -Dcom.sun.management.jmxremote.rmi.port=10444"
             {{- end }}
             {{- if .Values.extraEnvVars }}
@@ -283,8 +225,6 @@ spec:
           ports:
             - name: http
               containerPort: {{ .Values.containerPorts.http }}
-            - name: elastic
-              containerPort: {{ .Values.containerPorts.elastic }}
           {{- if not .Values.diagnosticMode.enabled }}
           {{- if .Values.customLivenessProbe }}
           livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.customLivenessProbe "context" $) | nindent 12 }}
@@ -314,8 +254,8 @@ spec:
           lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.lifecycleHooks "context" $) | nindent 12 }}
           {{- end }}
           volumeMounts:
-            - mountPath: /inalogy/midpoint
-              name: data
+            - name: mp-home
+              mountPath: /opt/midpoint/var
           {{- if .Values.extraVolumeMounts }}
           {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumeMounts "context" $) | nindent 12 }}
           {{- end }}
@@ -355,7 +295,7 @@ spec:
         {{- include "common.tplvalues.render" ( dict "value" .Values.sidecars "context" $) | nindent 8 }}
         {{- end }}
       volumes:
-        - name: data
+        - name: mp-home
           {{- if .Values.persistence.enabled }}
           persistentVolumeClaim:
             claimName: {{ (tpl .Values.persistence.existingClaim .) | default (include "common.names.fullname" .) }}

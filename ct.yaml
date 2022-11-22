@@ -1,0 +1,14 @@
+
+# See https://github.com/helm/chart-testing#configuration
+remote: origin
+target-branch: main
+chart-dirs:
+  - inalogy
+chart-repos:
+  - inalogy=https://charts.inalogy.com/inalogy
+helm-extra-args: --timeout 600s
+validate-chart-schema: true
+validate-maintainers: true
+validate-yaml: true
+debug: true
+# check-version-increment: true

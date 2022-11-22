@@ -1,0 +1,9 @@
+dependencies:
+- name: postgresql
+  repository: https://charts.bitnami.com/bitnami
+  version: 12.1.2
+- name: common
+  repository: https://charts.inalogy.com/inalogy
+  version: 2.2.0
+digest: sha256:92259ce9e2cb1a615eaee613132e084792a03c7987a134fb150e0fd2e04c0bff
+generated: "2022-11-20T14:26:27.601229+01:00"

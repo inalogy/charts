@@ -60,7 +60,7 @@ diagnosticMode:
 ## @section MidPoint Image parameters
 ##
 
-## Inalogy MidPoint image
+## MidPoint image
 ## ref: https://hub.docker.com/r/inalogy/midpoint/tags/
 ## @param image.registry MidPoint image registry
 ## @param image.repository MidPoint image repository
@@ -72,8 +72,8 @@ diagnosticMode:
 ##
 image:
   registry: docker.io
-  repository: inalogy/midpoint
-  tag: 9.7.1-debian-11-r0
+  repository: evolveum/midpoint
+  tag: 4.6-support
   digest: ""
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -97,11 +97,11 @@ image:
 ## ref: https://github.com/inalogy/containers/tree/main/inalogy/midpoint#environment-variables
 ## @param midpointUsername MidPoint username
 ##
-midpointUsername: user
+midpointUsername: administrator
 ## @param midpointPassword MidPoint user password
 ## Defaults to a random 10-character alphanumeric string if not set
 ##
-midpointPassword: ""
+midpointPassword: "5ecr3t"
 ## @param existingSecret Name of existing secret containing MidPoint credentials
 ## NOTE: Must contain key `midpoint-password`
 ## NOTE: When it's set, the `midpointPassword` parameter is ignored
@@ -109,7 +109,7 @@ midpointPassword: ""
 existingSecret: ""
 ## @param midpointEmail MidPoint user email
 ##
-midpointEmail: user@example.com
+midpointEmail: midpoint@example.com
 ## @param minHeapSize Minimum heap size for MidPoint
 ##
 minHeapSize: 1024m
@@ -118,7 +118,7 @@ minHeapSize: 1024m
 maxHeapSize: 2048m
 ## @param startTimeout Timeout for the application to start in seconds
 ##
-startTimeout: 150
+startTimeout: 360
 ## @param extraProperties List of extra properties to be set in the midpoint.properties file (key=value format)
 ## e.g:
 ## extraProperties:
@@ -131,60 +131,7 @@ extraProperties: []
 ## ref: https://github.com/inalogy/containers/tree/main/inalogy/midpoint#connect-midpoint-container-to-an-existing-database
 ##
 midpointSkipInstall: false
-## @param midpointSecurityRealm Set this to LDAP authenticate first against the external sytem. If the external system is not
-## reachable or if the user is not defined in the external system, authentication will be performed against MidPoint's internal database.
-##
-midpointSecurityRealm: ""
-## @param midpointAuthenticatorDowncase Set to true when connecting to a LDAP server using a case-insensitive setup.
-##
-midpointAuthenticatorDowncase: ""
-## Ldap configuration for MidPoint
-##
-ldap:
-  ## @param ldap.url URL of the LDAP server. If you are using ldaps, you should install the server certificate into the Java truststore
-  ##
-  url: ""
-  ## @param ldap.bindDn The username of an LDAP user to connect (or bind) with. Leave this blank for anonymous access to the LDAP directory.
-  ##
-  bindDn: ""
-  ## @param ldap.bindPassword The password of the user to connect with. Leave this blank for anonymous access to the LDAP directory.
-  ##
-  bindPassword: ""
-  ## @param ldap.authentication Possible values: simple, CRAM-MD5, DIGEST-MD5, GSSAPI. See the tutorial on authentication mechanisms (http://java.sun.com/products/jndi/tutorial/ldap/security/auth.html)
-  ##
-  authentication: simple
-  ## @param ldap.realm See Digest-MD5 Authentication, CRAM-MD5 Authentication (http://java.sun.com/products/jndi/tutorial/ldap/security/digest.html)
-  ##
-  realm: ""
-  ## @param ldap.contextFactoryClass Context factory class.
-  ##
-  contextFactoryClass: com.sun.jndi.ldap.LdapCtxFactory
-  ## @param ldap.StartTLS Enable use of StartTLS
-  ##
-  StartTLS: false
-  ## @param ldap.followReferrals Follow referrals or not
-  ##
-  followReferrals: true
-  ## User Mapping
-  ## @param ldap.user.baseDn Distinguished Name (DN) of the root node in LDAP from which to search for users.
-  ## @param ldap.user.request LDAP user request.
-  ## @param ldap.user.realNameAttribute in LDAP defining the user’s real name.
-  ## @param ldap.user.emailAttribute Attribute in LDAP defining the user’s email.
-  ##
-  user:
-    baseDn: ""
-    request: (&(objectClass=inetOrgPerson)(uid={login}))
-    realNameAttribute: cn
-    emailAttribute: mail
-  ## Group Mapping
-  ## @param ldap.group.baseDn Distinguished Name (DN) of the root node in LDAP from which to search for groups.
-  ## @param ldap.group.request LDAP group request.
-  ## @param ldap.group.idAttribute Attribute in LDAP defining the group’s real name.
-  ##
-  group:
-    baseDn: ""
-    request: (&(objectClass=groupOfUniqueNames)(uniqueMember={dn}))
-    idAttribute: cn
+
 ## SMTP mail delivery configuration
 ## ref: https://github.com/inalogy/containers/tree/main/inalogy/midpoint/#smtp-configuration
 ## @param smtpHost SMTP server host
@@ -234,8 +181,7 @@ replicaCount: 1
 ## @param containerPorts.elastic MidPoint Elasticsearch container port
 ##
 containerPorts:
-  http: 9000
-  elastic: 9001
+  http: 8080
 ## Configure extra options for MidPoint containers' liveness and readiness probes
 ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
 ## @param livenessProbe.enabled Enable livenessProbe on MidPoint containers
@@ -246,7 +192,7 @@ containerPorts:
 ## @param livenessProbe.successThreshold Success threshold for livenessProbe
 ##
 livenessProbe:
-  enabled: true
+  enabled: false
   initialDelaySeconds: 100
   periodSeconds: 10
   timeoutSeconds: 5
@@ -260,7 +206,7 @@ livenessProbe:
 ## @param readinessProbe.successThreshold Success threshold for readinessProbe
 ##
 readinessProbe:
-  enabled: true
+  enabled: false
   initialDelaySeconds: 100
   periodSeconds: 10
   timeoutSeconds: 5
@@ -297,7 +243,7 @@ customStartupProbe: {}
 resources:
   limits: {}
   requests:
-    cpu: 100m
+    cpu: 500m
     memory: 2048Mi
 ## Configure Pods Security Context
 ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
@@ -423,19 +369,14 @@ service:
   ##
   type: LoadBalancer
   ## @param service.ports.http MidPoint service HTTP port
-  ## @param service.ports.elastic MidPoint service ElasticSearch port
   ##
   ports:
     http: 80
-    elastic: 9001
   ## Node ports to expose
   ## @param service.nodePorts.http Node port for HTTP
-  ## @param service.nodePorts.elastic Node port for ElasticSearch
-  ## NOTE: choose port between <30000-32767>
   ##
   nodePorts:
     http: ""
-    elastic: ""
   ## @param service.clusterIP MidPoint service Cluster IP
   ## e.g.:
   ## clusterIP: None
@@ -493,7 +434,7 @@ ingress:
   ingressClassName: ""
   ## @param ingress.hostname Default host for the ingress record
   ##
-  hostname: midpoint.local
+  hostname: gcp-mp-1.inalogy.com
   ## @param ingress.path Default path for the ingress record
   ## NOTE: You may need to set this to '/*' in order to use this with ALB ingress controllers
   ##
@@ -600,7 +541,7 @@ persistence:
     - ReadWriteOnce
   ## @param persistence.size Persistent Volume size
   ##
-  size: 10Gi
+  size: 2Gi
   ## @param persistence.dataSource Custom PVC data source
   ##
   dataSource: {}
@@ -614,23 +555,23 @@ persistence:
 ## Changes the owner and group of the persistent volume mount point to runAsUser:fsGroup values
 ##   based on the *podSecurityContext/*containerSecurityContext parameters
 ##
-volumePermissions:
-  ## @param volumePermissions.enabled Enable init container that changes the owner/group of the PV mount point to `runAsUser:fsGroup`
+configInit:
+  ## @param midpointConfigInit.enabled Enable init container that initiliaze default midpoint configuration settings
   ##
-  enabled: false
+  enabled: true
   ## Inalogy Shell image
   ## ref: https://hub.docker.com/r/inalogy/inalogy-shell/tags/
-  ## @param volumePermissions.image.registry Inalogy Shell image registry
-  ## @param volumePermissions.image.repository Inalogy Shell image repository
-  ## @param volumePermissions.image.tag Inalogy Shell image tag (immutable tags are recommended)
-  ## @param volumePermissions.image.digest Inalogy Shell image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag
-  ## @param volumePermissions.image.pullPolicy Inalogy Shell image pull policy
-  ## @param volumePermissions.image.pullSecrets Inalogy Shell image pull secrets
+  ## @param configInit.image.registry Inalogy Shell image registry
+  ## @param configInit.image.repository Inalogy Shell image repository
+  ## @param configInit.image.tag Inalogy Shell image tag (immutable tags are recommended)
+  ## @param configInit.image.digest Inalogy Shell image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag
+  ## @param configInit.image.pullPolicy Inalogy Shell image pull policy
+  ## @param configInit.image.pullSecrets Inalogy Shell image pull secrets
   ##
   image:
     registry: docker.io
-    repository: inalogy/inalogy-shell
-    tag: 11-debian-11-r47
+    repository: evolveum/midpoint
+    tag: 4.6-support
     digest: ""
     pullPolicy: IfNotPresent
     ## Optionally specify an array of imagePullSecrets.
@@ -657,48 +598,7 @@ volumePermissions:
   ##   "auto" is especially useful for OpenShift which has scc with dynamic user ids (and 0 is not allowed)
   ##
   containerSecurityContext:
-    runAsUser: 0
-
-## @section Sysctl Image parameters
-##
-
-## Kernel settings modifier image
-##
-sysctl:
-  ## @param sysctl.enabled Enable kernel settings modifier image
-  ##
-  enabled: true
-  ## Inalogy Shell image
-  ## ref: https://hub.docker.com/r/inalogy/inalogy-shell/tags/
-  ## @param sysctl.image.registry Inalogy Shell image registry
-  ## @param sysctl.image.repository Inalogy Shell image repository
-  ## @param sysctl.image.tag Inalogy Shell image tag (immutable tags are recommended)
-  ## @param sysctl.image.digest Inalogy Shell image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag
-  ## @param sysctl.image.pullPolicy Inalogy Shell image pull policy
-  ## @param sysctl.image.pullSecrets Inalogy Shell image pull secrets
-  ##
-  image:
-    registry: docker.io
-    repository: inalogy/inalogy-shell
-    tag: 11-debian-11-r47
-    digest: ""
-    pullPolicy: IfNotPresent
-    ## Optionally specify an array of imagePullSecrets.
-    ## Secrets must be manually created in the namespace.
-    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-    ## e.g:
-    ## pullSecrets:
-    ##   - myRegistryKeySecretName
-    ##
-    pullSecrets: []
-  ## Init container's resource requests and limits
-  ## ref: https://kubernetes.io/docs/user-guide/compute-resources/
-  ## @param sysctl.resources.limits The resources limits for the init container
-  ## @param sysctl.resources.requests The requested resources for the init container
-  ##
-  resources:
-    limits: {}
-    requests: {}
+    runAsUser: auto
 
 ## @section Other Parameters
 ##
@@ -882,7 +782,7 @@ metrics:
 postgresql:
   ## @param postgresql.enabled Deploy PostgreSQL subchart
   ##
-  enabled: true
+  enabled: false
   ## @param postgresql.nameOverride Override name of the PostgreSQL chart
   ##
   nameOverride: ""
@@ -896,10 +796,10 @@ postgresql:
     password: ""
     ## @param postgresql.auth.username Username to create when deploying the PostgreSQL chart
     ##
-    username: bn_midpoint
+    username: midpoint
     ## @param postgresql.auth.database Database to create when deploying the PostgreSQL chart
     ##
-    database: inalogy_midpoint
+    database: midpoint
   ## PostgreSQL service
   ##
   service:
@@ -933,6 +833,7 @@ postgresql:
     ##
     size: 8Gi
 
+
 ## @section External Database settings
 ##
 
@@ -942,13 +843,13 @@ postgresql:
 externalDatabase:
   ## @param externalDatabase.host Host of an external PostgreSQL instance to connect (only if postgresql.enabled=false)
   ##
-  host: ""
+  host: "34.67.46.103"
   ## @param externalDatabase.user User of an external PostgreSQL instance to connect (only if postgresql.enabled=false)
   ##
-  user: postgres
+  user: midpoint
   ## @param externalDatabase.password Password of an external PostgreSQL instance to connect (only if postgresql.enabled=false)
   ##
-  password: ""
+  password: "phie4saigheeng0sa0OShoong0oCh8me"
   ## @param externalDatabase.existingSecret Secret containing the password of an external PostgreSQL instance to connect (only if postgresql.enabled=false)
   ## Name of an existing secret resource containing the DB password in a 'password' key
   ##

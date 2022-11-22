@@ -6,21 +6,14 @@ Return the proper MidPoint image name
 {{- end -}}
 
 {{/*
-Return the proper image name (for the init container volume-permissions image)
+Return the proper config init image name
 */}}
-{{- define "midpoint.volumePermissions.image" -}}
-{{- include "common.images.image" ( dict "imageRoot" .Values.volumePermissions.image "global" .Values.global ) -}}
+{{- define "midpoint.configInit.image" -}}
+{{ include "common.images.image" (dict "imageRoot" .Values.configInit.image "global" .Values.global) }}
 {{- end -}}
 
 {{/*
-Return the proper sysctl image name
-*/}}
-{{- define "midpoint.sysctl.image" -}}
-{{ include "common.images.image" (dict "imageRoot" .Values.sysctl.image "global" .Values.global) }}
-{{- end -}}
-
-{{/*
-Return the proper sysctl image name
+Return the proper jmx image name
 */}}
 {{- define "midpoint.metrics.jmx.image" -}}
 {{ include "common.images.image" (dict "imageRoot" .Values.metrics.jmx.image "global" .Values.global) }}
@@ -30,7 +23,7 @@ Return the proper sysctl image name
 Return the proper Container Image Registry Secret Names
 */}}
 {{- define "midpoint.imagePullSecrets" -}}
-{{- include "common.images.pullSecrets" (dict "images" (list .Values.image .Values.volumePermissions.image .Values.sysctl.image .Values.metrics.jmx.image) "global" .Values.global) -}}
+{{- include "common.images.pullSecrets" (dict "images" (list .Values.image .Values.configInit.image .Values.metrics.jmx.image) "global" .Values.global) -}}
 {{- end -}}
 
 {{/*
@@ -51,6 +44,14 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- define "midpoint.postgresql.fullname" -}}
 {{- include "common.names.dependency.fullname" (dict "chartName" "postgresql" "chartValues" .Values.postgresql "context" $) -}}
 {{- end -}}
+
+{{/*
+Return the Database Url
+*/}}
+{{- define "midpoint.database.url" -}}
+  {{- printf "jdbc:postgresql://%s:%s/%s" ( include "midpoint.database.host" .) (include "midpoint.database.port" .) ( include "midpoint.database.name" .) -}}
+{{- end -}}
+
 
 {{/*
 Return the Database Hostname

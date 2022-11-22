@@ -84,8 +84,6 @@ You can access the JMX Prometheus metrics following the steps below:
 {{- end }}
 
 {{- include "common.warnings.rollingTag" .Values.image }}
-{{- include "common.warnings.rollingTag" .Values.volumePermissions.image }}
-{{- include "common.warnings.rollingTag" .Values.sysctl.image }}
 {{- include "midpoint.validateValues" . }}
 {{- $passwordValidationErrors := list -}}
 {{- if not .Values.existingSecret -}}
