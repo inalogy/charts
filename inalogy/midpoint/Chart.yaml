@@ -27,4 +27,4 @@ name: midpoint
 sources:
   - https://github.com/inalogy/containers/tree/main/inalogy/midpoint
   - https://github.com/evolveum/midpoint
-version: 1.0.0
+version: 1.0.1
