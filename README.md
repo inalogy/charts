@@ -13,14 +13,6 @@ $ helm search repo inalogy
 $ helm install my-release inalogy/<chart>
 ```
 
-## Vulnerabilities scanner
-
-Each Helm chart contains one or more containers. Those containers use images provided by Inalogy through its test & release pipeline and whose source code can be found at [inalogy/containers](https://github.com/inalogy/containers).
-
-As part of the container releases, the images are scanned for vulnerabilities, [here](https://github.com/inalogy/containers#vulnerability-scan-in-inalogy-container-images) you can find more info about this topic.
-
-Since the container image is an immutable artifact that is already analyzed, as part of the Helm chart release process we are not looking for vulnerabilities in the containers but running different verification to ensure the Helm charts work as expected, see the testing strategy defined at [_TESTING.md_](https://github.com/inalogy/charts/blob/main/TESTING.md).
-
 ## Before you begin
 
 ### Prerequisites
@@ -56,6 +48,10 @@ Useful Helm Client Commands:
 * View available charts: `helm search repo`
 * Install a chart: `helm install my-release inalogy/<package-name>`
 * Upgrade your application: `helm upgrade`
+
+## Credits
+
+This repo is based on [Bitnami](https://github.com/bitnami/charts).
 
 ## License
 
