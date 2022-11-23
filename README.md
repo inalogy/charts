@@ -5,7 +5,6 @@
 
 Popular applications, provided by [Inalogy](https://inalogy.com), ready to launch on Kubernetes using [Kubernetes Helm](https://github.com/helm/helm).
 
-## TL;DR
 
 ```bash
 $ helm repo add inalogy https://charts.inalogy.com/inalogy
