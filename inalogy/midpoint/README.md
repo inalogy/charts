@@ -8,7 +8,7 @@ Evolveum midPoint is a comprehensive Identity Governance and Administration (IGA
 
 Trademarks: This software listing is packaged by Inalogy. The respective trademarks mentioned in the offering are owned by the respective companies, and use of them does not imply any affiliation or endorsement.
                            
-## TL;DR
+## Add Helm Repository
 
 ```console
 $ helm repo add my-repo https://charts.inalogy.com/inalogy
@@ -23,7 +23,7 @@ Inalogy charts can be used with [Kubeapps](https://kubeapps.dev/) for deployment
 
 ## Prerequisites
 
-- Kubernetes 1.25+
+- Kubernetes 1.22+
 - Helm 3.2.0+
 - PV provisioner support in the underlying infrastructure
 - ReadWriteMany volumes for deployment scaling
@@ -102,22 +102,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | `maxHeapSize`                 | Maximum heap size for MidPoint                                                                                                                                            | `2048m`                                                  |
 | `startTimeout`                | Timeout for the application to start in seconds                                                                                                                           | `150`                                                    |
 | `extraProperties`             | List of extra properties to be set in the midpoint.properties file (key=value format)                                                                                     | `[]`                                                     |
-| `midpointSecurityRealm`       | Set this to LDAP authenticate first against the external sytem. If the external system is not                                                                             | `""`                                                     |
-| `ldap.url`                    | URL of the LDAP server. If you are using ldaps, you should install the server certificate into the Java truststore                                                        | `""`                                                     |
-| `ldap.bindDn`                 | The username of an LDAP user to connect (or bind) with. Leave this blank for anonymous access to the LDAP directory.                                                      | `""`                                                     |
-| `ldap.bindPassword`           | The password of the user to connect with. Leave this blank for anonymous access to the LDAP directory.                                                                    | `""`                                                     |
-| `ldap.authentication`         | Possible values: simple, CRAM-MD5, DIGEST-MD5, GSSAPI. See the tutorial on authentication mechanisms (http://java.sun.com/products/jndi/tutorial/ldap/security/auth.html) | `simple`                                                 |
-| `ldap.realm`                  | See Digest-MD5 Authentication, CRAM-MD5 Authentication (http://java.sun.com/products/jndi/tutorial/ldap/security/digest.html)                                             | `""`                                                     |
-| `ldap.contextFactoryClass`    | Context factory class.                                                                                                                                                    | `com.sun.jndi.ldap.LdapCtxFactory`                       |
-| `ldap.StartTLS`               | Enable use of StartTLS                                                                                                                                                    | `false`                                                  |
-| `ldap.followReferrals`        | Follow referrals or not                                                                                                                                                   | `true`                                                   |
-| `ldap.user.baseDn`            | Distinguished Name (DN) of the root node in LDAP from which to search for users.                                                                                          | `""`                                                     |
-| `ldap.user.request`           | LDAP user request.                                                                                                                                                        | `(&(objectClass=inetOrgPerson)(uid={login}))`            |
-| `ldap.user.realNameAttribute` | in LDAP defining the user’s real name.                                                                                                                                    | `cn`                                                     |
-| `ldap.user.emailAttribute`    | Attribute in LDAP defining the user’s email.                                                                                                                              | `mail`                                                   |
-| `ldap.group.baseDn`           | Distinguished Name (DN) of the root node in LDAP from which to search for groups.                                                                                         | `""`                                                     |
-| `ldap.group.request`          | LDAP group request.                                                                                                                                                       | `(&(objectClass=groupOfUniqueNames)(uniqueMember={dn}))` |
-| `ldap.group.idAttribute`      | Attribute in LDAP defining the group’s real name.                                                                                                                         | `cn`                                                     |
+`cn`                                                     |
 | `smtpHost`                    | SMTP server host                                                                                                                                                          | `""`                                                     |
 | `smtpPort`                    | SMTP server port                                                                                                                                                          | `""`                                                     |
 | `smtpUser`                    | SMTP username                                                                                                                                                             | `""`                                                     |
@@ -230,8 +215,8 @@ The command removes all the Kubernetes components associated with the chart and 
 | `persistence.annotations`                              | Persistent Volume Claim annotations                                                                           | `{}`                    |
 | `volumePermissions.enabled`                            | Enable init container that changes the owner/group of the PV mount point to `runAsUser:fsGroup`               | `false`                 |
 | `volumePermissions.image.registry`                     | Inalogy Shell image registry                                                                                  | `docker.io`             |
-| `volumePermissions.image.repository`                   | Inalogy Shell image repository                                                                                | `inalogy/inalogy-shell` |
-| `volumePermissions.image.tag`                          | Inalogy Shell image tag (immutable tags are recommended)                                                      | `11-debian-11-r47`      |
+| `volumePermissions.image.repository`                   | Inalogy Shell image repository                                                                                | `evolveum/midpoint` |
+| `volumePermissions.image.tag`                          | Inalogy Shell image tag (immutable tags are recommended)                                                      | `4.6-support`      |
 | `volumePermissions.image.digest`                       | Inalogy Shell image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag | `""`                    |
 | `volumePermissions.image.pullPolicy`                   | Inalogy Shell image pull policy                                                                               | `IfNotPresent`          |
 | `volumePermissions.image.pullSecrets`                  | Inalogy Shell image pull secrets                                                                              | `[]`                    |
@@ -240,19 +225,6 @@ The command removes all the Kubernetes components associated with the chart and 
 | `volumePermissions.containerSecurityContext.runAsUser` | Set init container's Security Context runAsUser                                                               | `0`                     |
 
 
-### Sysctl Image parameters
-
-| Name                        | Description                                                                                                   | Value                   |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------- | ----------------------- |
-| `sysctl.enabled`            | Enable kernel settings modifier image                                                                         | `true`                  |
-| `sysctl.image.registry`     | Inalogy Shell image registry                                                                                  | `docker.io`             |
-| `sysctl.image.repository`   | Inalogy Shell image repository                                                                                | `inalogy/inalogy-shell` |
-| `sysctl.image.tag`          | Inalogy Shell image tag (immutable tags are recommended)                                                      | `11-debian-11-r47`      |
-| `sysctl.image.digest`       | Inalogy Shell image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag | `""`                    |
-| `sysctl.image.pullPolicy`   | Inalogy Shell image pull policy                                                                               | `IfNotPresent`          |
-| `sysctl.image.pullSecrets`  | Inalogy Shell image pull secrets                                                                              | `[]`                    |
-| `sysctl.resources.limits`   | The resources limits for the init container                                                                   | `{}`                    |
-| `sysctl.resources.requests` | The requested resources for the init container                                                                | `{}`                    |
 
 
 ### Other Parameters
@@ -335,17 +307,8 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The above parameters map to the env variables defined in [inalogy/midpoint](https://github.com/inalogy/containers/tree/main/inalogy/midpoint). For more information please refer to the [inalogy/midpoint](https://github.com/inalogy/containers/tree/main/inalogy/midpoint) image documentation.
 
-Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example,
 
-```console
-$ helm install my-release \
-  --set midpointUsername=admin \
-  --set midpointPassword=password \
-  --set postgresql.auth.password=secretpassword \
-    my-repo/midpoint
-```
-
-The above command sets the midpoint administrator account username and password to `admin` and `password` respectively. Additionally, it sets the PostgreSQL `postgres` user password to `secretpassword`.
+The default account username and password to `administrator` and `5ecr3t` respectively. Additionally, it sets the PostgreSQL `postgres` user password to `secretpassword`.
 
 > NOTE: Once this chart is deployed, it is not possible to change the application's access credentials, such as usernames or passwords, using Helm. To change these application credentials after deployment, delete any persistent volumes (PVs) used by the chart and re-deploy it, or use the application's built-in administrative tools if available.
 
@@ -355,40 +318,9 @@ Alternatively, a YAML file that specifies the values for the above parameters ca
 $ helm install my-release -f values.yaml my-repo/midpoint
 ```
 
-> **Tip**: You can use the default [values.yaml](values.yaml)
-
-## Configuration and installation details
-
-### [Rolling VS Immutable tags](https://docs.inalogy.com/containers/how-to/understand-rolling-tags-containers/)
-
-It is strongly recommended to use immutable tags in a production environment. This ensures your deployment does not change automatically if the same tag is updated with a different image.
-
-Inalogy will release a new chart updating its containers if a new version of the main container, significant changes, or critical vulnerabilities exist.
-
-### Default kernel settings
-
-Currently, MidPoint requires some changes in the kernel of the host machine to work as expected. If those values are not set in the underlying operating system, the MidPoint containers fail to boot with ERROR messages. More information about these requirements can be found in the links below:
-
-- [File Descriptor requirements](https://www.elastic.co/guide/en/elasticsearch/reference/current/file-descriptors.html)
-- [Virtual memory requirements](https://www.elastic.co/guide/en/elasticsearch/reference/current/vm-max-map-count.html)
-
-This chart uses a **privileged** initContainer to change those settings in the Kernel by running: `sysctl -w vm.max_map_count=262144 && sysctl -w fs.file-max=65536`. You can disable the initContainer using the `sysctl.enabled=false` parameter.
-
 ### External database support
 
 You may want to have MidPoint connect to an external database rather than installing one inside your cluster. Typical reasons for this are to use a managed database service, or to share a common database server for all your applications. To achieve this, set the `postgresql.enabled` parameter to `false` and specify the credentials for the external database using the `externalDatabase.*` parameters.
-
-Refer to the [chart documentation on using an external database](https://docs.inalogy.com/kubernetes/apps/midpoint/configuration/use-external-database) for more details and an example.
-
-### Ingress
-
-This chart provides support for Ingress resources. If you have an ingress controller installed on your cluster, such as [nginx-ingress-controller](https://github.com/bitnami/charts/tree/main/bitnami/nginx-ingress-controller) or [contour](https://github.com/bitnami/charts/tree/main/bitnami/contour) you can utilize the ingress controller to serve your application.
-
-To enable Ingress integration, set `ingress.enabled` to `true`. The `ingress.hostname` property can be used to set the host name. The `ingress.tls` parameter can be used to add the TLS configuration for this host. It is also possible to have more than one host, with a separate TLS configuration for each host. [Learn more about configuring and using Ingress](https://docs.inalogy.com/kubernetes/apps/midpoint/configuration/configure-ingress/).
-
-### TLS secrets
-
-The chart also facilitates the creation of TLS secrets for use with the Ingress controller, with different options for certificate management. [Learn more about TLS secrets](https://docs.inalogy.com/kubernetes/apps/midpoint/administration/enable-tls-ingress/).
 
 ### Additional environment variables
 
@@ -403,16 +335,6 @@ midpoint:
 
 Alternatively, you can use a ConfigMap or a Secret with the environment variables. To do so, use the `extraEnvVarsCM` or the `extraEnvVarsSecret` values.
 
-### Sidecars
-
-If additional containers are needed in the same pod as MidPoint (such as additional metrics or logging exporters), they can be defined using the `sidecars` parameter. If these sidecars export extra ports, extra port definitions can be added using the `service.extraPorts` parameter. [Learn more about configuring and using sidecar containers](https://docs.inalogy.com/kubernetes/apps/midpoint/configuration/configure-sidecar-init-containers/).
-
-### Pod affinity
-
-This chart allows you to set your custom affinity using the `affinity` parameter. Find more information about Pod affinity in the [kubernetes documentation](https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity).
-
-As an alternative, use one of the preset configurations for pod affinity, pod anti-affinity, and node affinity available at the [inalogy/common](https://github.com/inalogy/charts/tree/main/inalogy/common#affinities) chart. To do so, set the `podAffinityPreset`, `podAntiAffinityPreset`, or `nodeAffinityPreset` parameters.
-
 ## Persistence
 
 The [Inalogy MidPoint](https://github.com/inalogy/containers/tree/main/inalogy/midpoint) image stores the MidPoint data and configurations at the `/inalogy/midpoint` path of the container. Persistent Volume Claims are used to keep the data across deployments.
@@ -424,20 +346,6 @@ As the image run as non-root by default, it is necessary to adjust the ownership
 By default, the chart is configured to use Kubernetes Security Context to automatically change the ownership of the volume. However, this feature does not work in all Kubernetes distributions.
 
 As an alternative, this chart supports using an initContainer to change the ownership of the volume before mounting it in the final destination. You can enable this initContainer by setting `volumePermissions.enabled` to `true`.
-
-## Troubleshooting
-
-Find more information about how to deal with common errors related to Inalogy's Helm charts in [this troubleshooting guide](https://docs.inalogy.com/general/how-to/troubleshoot-helm-chart-issues).
-
-## Upgrading
-
-### To 2.0.0
-
-This major updates the PostgreSQL subchart to its newest major, 15.0.0. [Here](https://github.com/inalogy/charts/tree/master/inalogy/postgresql#to-1500) you can find more information about the changes introduced in that version.
-
-### To any previous version
-
-Refer to the [chart documentation for more information about how to upgrade from previous releases](https://docs.inalogy.com/kubernetes/apps/midpoint/administration/upgrade/).
 
 ## License
 
