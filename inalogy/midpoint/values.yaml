@@ -118,7 +118,7 @@ midpointEmail: midpoint@example.com
 #
 #  Tobe Documented & Refactored #
 
-midpoint: 
+midpoint:
   createConfigmap: true
   schema:
     enabled: true
@@ -131,7 +131,7 @@ midpoint:
     download: |-
       http://cdn.inalogy.com/midpoint/connectors/connector-msgraph-1.1.0.0-SNAPSHOT.jar
       http://cdn.inalogy.com/midpoint/connectors/connector-keycloak-1.1.6-SNAPSHOT.jar
-      
+
 ###################################################################################################
 ###################################################################################################
 
@@ -836,8 +836,8 @@ postgresql:
       postgres-new.sql: $(curl -fsSL https://raw.githubusercontent.com/Evolveum/midpoint/support-4.6/config/sql/native-new/postgres-new.sql)"
       postgres-new-quartz.sql: $(curl -fsSL https://raw.githubusercontent.com/Evolveum/midpoint/support-4.6/config/sql/native-new/postgres-new-quartz.sql)"
       postgres-new-audit.sql: $(curl -fsSL https://raw.githubusercontent.com/Evolveum/midpoint/support-4.6/config/sql/native-new/postgres-new-audit.sql)"
-  
-  ## @param postgresql.architecture Database to create will be standalone e.g. not replicated 
+
+  ## @param postgresql.architecture Database to create will be standalone e.g. not replicated
   ##
   architecture: standalone
 
