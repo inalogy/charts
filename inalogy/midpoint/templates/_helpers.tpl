@@ -197,3 +197,69 @@ midpoint: database
        externalDatabase.database=DB_NAME
 {{- end -}}
 {{- end -}}
+
+
+{{/*
+Return true if a configmap object should be created for midpoint
+*/}}
+{{- define "midpoint.createConfigmap" -}}
+    {{- true -}}
+{{- end -}}
+
+{{/*
+Return the MidPoint Configmap
+*/}}
+{{- define "midpoint.configmap" -}}
+    {{ printf "%s-configuration" (include "common.names.fullname" .) }}
+{{- end -}}
+
+{{/*
+Return the MidPoint Customized Schema Objects configmap
+*/}}
+{{- define "midpoint.configmap.schema" -}}
+    {{ printf "%s-schema" (include "common.names.fullname" .) }}
+{{- end -}}
+
+{{/*
+Return the MidPoint Schema Path 
+*/}}
+{{- define "midpoint.configmap.schema.path" -}}
+{{- if .Values.midpoint.schema.enabled }}
+    {{- printf "%s" (tpl .Values.midpoint.schema.sourcePath .) -}}
+{{- else -}}
+    {{- printf "" -}}
+{{- end -}}
+{{- end -}}
+
+
+{{/*
+Return the MidPoint Customized SQL updates configmap
+*/}}
+{{- define "midpoint.configmap.sql" -}}
+    {{ printf "%s-sql" (include "common.names.fullname" .) }}
+{{- end -}}
+
+{{/*
+Return the MidPoint SQL Path 
+*/}}
+{{- define "midpoint.configmap.sql.path" -}}
+{{- if .Values.midpoint.sql.enabled }}
+    {{- printf "%s" (tpl .Values.midpoint.sql.sourcePath .) -}}
+{{- else -}}
+    {{- printf "" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return the MidPoint Post Initial Objects configmap
+*/}}
+{{- define "midpoint.configmap.poi" -}}
+    {{ printf "%s-poi" (include "common.names.fullname" .) }}
+{{- end -}}
+
+{{/*
+Return the MidPoint Connector Configmap
+*/}}
+{{- define "midpoint.configmap.connectors" -}}
+    {{ printf "%s-connectors" (include "common.names.fullname" .) }}
+{{- end -}}

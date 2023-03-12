@@ -72,7 +72,7 @@ diagnosticMode:
 ##
 image:
   registry: docker.io
-  repository: evolveum/midpoint
+  repository: inalogy/midpoint
   tag: 4.6-support
   digest: ""
   ## Specify a imagePullPolicy
@@ -110,12 +110,38 @@ existingSecret: ""
 ## @param midpointEmail MidPoint user email
 ##
 midpointEmail: midpoint@example.com
+
+###################################################################################################
+###################################################################################################
+## NEW parameters
+#
+#
+#  Tobe Documented & Refactored #
+
+midpoint: 
+  createConfigmap: true
+  schema:
+    enabled: true
+  sql:
+    enabled: true
+  poi:
+    enabled: true
+  additionalConnectors:
+    enabled: true
+    download: |-
+      http://cdn.inalogy.com/midpoint/connectors/connector-msgraph-1.1.0.0-SNAPSHOT.jar
+      http://cdn.inalogy.com/midpoint/connectors/connector-keycloak-1.1.6-SNAPSHOT.jar
+      
+###################################################################################################
+###################################################################################################
+
+
 ## @param minHeapSize Minimum heap size for MidPoint
 ##
 minHeapSize: 1024m
 ## @param maxHeapSize Maximum heap size for MidPoint
 ##
-maxHeapSize: 2048m
+maxHeapSize: 3072m
 ## @param startTimeout Timeout for the application to start in seconds
 ##
 startTimeout: 360
@@ -244,7 +270,7 @@ resources:
   limits: {}
   requests:
     cpu: 500m
-    memory: 2048Mi
+    memory: 3072Mi
 ## Configure Pods Security Context
 ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
 ## @param podSecurityContext.enabled Enabled MidPoint pods' Security Context
@@ -367,11 +393,11 @@ initContainers: []
 service:
   ## @param service.type MidPoint service type
   ##
-  type: LoadBalancer
+  type: ClusterIP
   ## @param service.ports.http MidPoint service HTTP port
   ##
   ports:
-    http: 80
+    http: 8080
   ## Node ports to expose
   ## @param service.nodePorts.http Node port for HTTP
   ##
@@ -528,7 +554,7 @@ ingress:
 persistence:
   ## @param persistence.enabled Enable persistence using Persistent Volume Claims
   ##
-  enabled: true
+  enabled: false
   ## @param persistence.storageClass Persistent Volume storage class
   ## If defined, storageClassName: <storageClass>
   ## If set to "-", storageClassName: "", which disables dynamic provisioning
@@ -570,8 +596,8 @@ configInit:
   ##
   image:
     registry: docker.io
-    repository: evolveum/midpoint
-    tag: 4.6-support
+    repository: inalogy/mpi
+    tag: 0.2.13
     digest: ""
     pullPolicy: IfNotPresent
     ## Optionally specify an array of imagePullSecrets.
@@ -777,15 +803,21 @@ metrics:
 ##
 
 ## PostgreSQL chart configuration
-## https://github.com/inalogy/charts/blob/main/inalogy/postgresql/values.yaml
+## https://github.com/bitnami/charts/blob/main/bitnami/postgresql/values.yaml
 ##
 postgresql:
   ## @param postgresql.enabled Deploy PostgreSQL subchart
   ##
-  enabled: false
+  enabled: true
   ## @param postgresql.nameOverride Override name of the PostgreSQL chart
   ##
   nameOverride: ""
+
+  image:
+    registry: docker.io
+    repository: bitnami/postgresql
+    tag: 14
+
   auth:
     ## @param postgresql.auth.existingSecret Existing secret containing the password of the PostgreSQL chart
     ##
@@ -793,13 +825,22 @@ postgresql:
     ## @param postgresql.auth.password Password for the postgres user of the PostgreSQL chart (auto-generated if not set)
     ## ref: https://hub.docker.com/_/postgres/
     ##
-    password: ""
+    password: "5ecr3t"
     ## @param postgresql.auth.username Username to create when deploying the PostgreSQL chart
     ##
     username: midpoint
     ## @param postgresql.auth.database Database to create when deploying the PostgreSQL chart
     ##
     database: midpoint
+    initdbScripts:
+      postgres-new.sql: $(curl -fsSL https://raw.githubusercontent.com/Evolveum/midpoint/support-4.6/config/sql/native-new/postgres-new.sql)"
+      postgres-new-quartz.sql: $(curl -fsSL https://raw.githubusercontent.com/Evolveum/midpoint/support-4.6/config/sql/native-new/postgres-new-quartz.sql)"
+      postgres-new-audit.sql: $(curl -fsSL https://raw.githubusercontent.com/Evolveum/midpoint/support-4.6/config/sql/native-new/postgres-new-audit.sql)"
+  
+  ## @param postgresql.architecture Database to create will be standalone e.g. not replicated 
+  ##
+  architecture: standalone
+
   ## PostgreSQL service
   ##
   service:
@@ -843,13 +884,13 @@ postgresql:
 externalDatabase:
   ## @param externalDatabase.host Host of an external PostgreSQL instance to connect (only if postgresql.enabled=false)
   ##
-  host: "34.67.46.103"
+  host: localhost
   ## @param externalDatabase.user User of an external PostgreSQL instance to connect (only if postgresql.enabled=false)
   ##
   user: midpoint
   ## @param externalDatabase.password Password of an external PostgreSQL instance to connect (only if postgresql.enabled=false)
   ##
-  password: "phie4saigheeng0sa0OShoong0oCh8me"
+  password: "jei8rohjieSieweetho4miachuqui4nu"
   ## @param externalDatabase.existingSecret Secret containing the password of an external PostgreSQL instance to connect (only if postgresql.enabled=false)
   ## Name of an existing secret resource containing the DB password in a 'password' key
   ##

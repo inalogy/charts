@@ -69,14 +69,29 @@ spec:
         - name: mp-config-init
           image: {{ include "midpoint.configInit.image" . }}
           imagePullPolicy: {{ .Values.configInit.image.pullPolicy | quote }}
-          command: ["/bin/bash","/opt/midpoint/bin/midpoint.sh","init-native"]
+          command: ["/bin/bash","/opt/midpoint/bin/init.sh"]
           env:
-            - name: MP_INIT_CFG
-              value: /opt/mp-home
+            - name: PGHOST
+              value: {{ include "midpoint.database.host" . | quote }}
+            - name: PGPORT
+              value: {{ include "midpoint.database.port" . | quote }}
+            - name: PGDATABASE
+              value: {{ include "midpoint.database.name" . | quote }}
+            - name: PGUSER
+              value: {{ include "midpoint.database.username" . | quote }}
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "midpoint.database.secretName" . }}
+                  key: password
+            # - name: MP_INIT_CFG
+            #   value: /opt/midpoint/initConfig.xml
+            - name: MP_CHECK
+              value: /opt/midpoint/var/init_in_progress
             - name: MP_PW_DEF
-              value: /opt/mp-home/keystorepw
+              value: /opt/midpoint/var/keystorepw
             - name: MP_KEYSTORE
-              value: /opt/mp-home/keystore.jceks
+              value: /opt/midpoint/var/keystore.jceks
             - name: MP_CERT
               value: |
                 -----BEGIN CERTIFICATE-----
@@ -104,8 +119,16 @@ spec:
                 -----END CERTIFICATE-----              
           volumeMounts:
             - name: mp-home
-              mountPath: /opt/mp-home
-
+              mountPath: /opt/midpoint/var
+          {{- if .Values.midpoint.additionalConnectors.enabled }}
+            - name: mp-extra-connectors
+              mountPath: /opt/midpoint/var/connectors.download  
+              subPath: connectors.download
+          {{- end }}                   
+          {{- if .Values.midpoint.sql.enabled  }}
+            - name: mp-sql
+              mountPath: /opt/midpoint/var/extra-sql
+          {{- end }}                   
           {{- if .Values.configInit.resources }}
           resources: {{- toYaml .Values.configInit.resources | nindent 12 }}
           {{- end }}
@@ -132,6 +155,11 @@ spec:
           args: {{- include "common.tplvalues.render" (dict "value" .Values.args "context" $) | nindent 12 }}
           {{- end }}
           env:
+            - name: POD_NAME
+              valueFrom: 
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.name          
             - name: MP_SET_file_encoding
               value: UTF8 
             - name: MP_SET_midpoint_repository_database
@@ -149,8 +177,12 @@ spec:
               value: "1"
             - name: MP_NO_ENV_COMPAT
               value: "1"
+            - name: MP_CHECK
+              value: /opt/midpoint/var/init_in_progress              
             - name: INALOGY_DEBUG
               value: {{ ternary "true" "false" (or .Values.image.debug .Values.diagnosticMode.enabled) | quote }}
+            # - name: MP_INIT_CFG
+            #   value: /opt/midpoint/initConfig.xml
             - name: MP_START_TIMEOUT
               value: {{ .Values.startTimeout | quote }}
             - name: MP_DATABASE_HOST
@@ -256,6 +288,17 @@ spec:
           volumeMounts:
             - name: mp-home
               mountPath: /opt/midpoint/var
+            - name: mp-config
+              mountPath: /opt/midpoint/var/config.xml
+              subPath: config.xml
+          {{- if .Values.midpoint.schema.enabled  }}
+            - name: mp-schema
+              mountPath: /opt/midpoint/var/schema
+          {{- end }}
+          {{- if .Values.midpoint.poi.enabled  }}
+            - name: mp-poi
+              mountPath: /opt/midpoint/var/post-initial-objects
+          {{- end }}
           {{- if .Values.extraVolumeMounts }}
           {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumeMounts "context" $) | nindent 12 }}
           {{- end }}
@@ -307,6 +350,27 @@ spec:
           configMap:
             name: {{ printf "%s-jmx-conf" (include "common.names.fullname" .) }}
         {{- end }}
+        {{- if .Values.midpoint.sql.enabled  }}
+        - name: mp-sql
+          configMap:
+            name:  {{ include "midpoint.configmap.sql" . }}
+        {{- end }}
+        {{- if .Values.midpoint.schema.enabled  }}
+        - name: mp-schema
+          configMap:
+            name:  {{ include "midpoint.configmap.schema" . }}
+        {{- end }}
+        {{- if .Values.midpoint.poi.enabled  }}
+        - name: mp-poi
+          configMap:
+            name:  {{ include "midpoint.configmap.poi" . }}
+        {{- end }}
+        - name: mp-config
+          configMap:
+            name: {{ include "midpoint.configmap" . }}
+        - name: mp-extra-connectors
+          configMap:
+            name: {{ include "midpoint.configmap.connectors" . }}  
         {{- if .Values.extraVolumes }}
         {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumes "context" $) | nindent 8 }}
         {{- end }}
