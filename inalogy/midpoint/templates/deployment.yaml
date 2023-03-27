@@ -89,34 +89,14 @@ spec:
             - name: MP_CHECK
               value: /opt/midpoint/var/init_in_progress
             - name: MP_PW_DEF
-              value: /opt/midpoint/var/keystorepw
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "midpoint.secretName" . }}
+                  key: keystore-password         
             - name: MP_KEYSTORE
-              value: /opt/midpoint/var/keystore.jceks
+              value:  {{ .Values.keystoreFile | quote }}
             - name: MP_CERT
-              value: |
-                -----BEGIN CERTIFICATE-----
-                MIIDxDCCAqygAwIBAgIUfImu6HQ145sOn1ra6pYn9KgIQzkwDQYJKoZIhvcNAQEL
-                BQAwFDESMBAGA1UEAwwJZGVtbyBjZXJ0MB4XDTIyMDIyMjA5MDQ1M1oXDTMyMDIy
-                MDA5MDQ1M1owFDESMBAGA1UEAwwJZGVtbyBjZXJ0MIIBIjANBgkqhkiG9w0BAQEF
-                AAOCAQ8AMIIBCgKCAQEAu4k5OzoZdBuBlc6ZVp3uwhiQi2sfRRPU8dzTATb6zN/W
-                7Fn3mBngjHRfKKNBcmKgnlIA75qziiKew75/Zis50kT5lxTcS3fVylBfkNFO1WQO
-                qg0FJBMoGPdrKRxww8XbAB5fThSNHe5ZlY0RhFX7xWSADzA7X4FzGsuou6l1xhrT
-                MNu8brfUnf6JWG019mdevclhZzKycAW70UdhAOYj7a3LPMxGev7tLQCA25LCL0Gd
-                jfZnZzkkyhYQbqkUmt6wAKmTesF3Az8uW7FKWIZ9kLkrXVP7xviGI7ga+XYrWM+Q
-                1515ecUXL3YmODn/WdFbwGSnAXl9mQIyZmNRAsHuSwIDAQABo4IBDDCCAQgwCQYD
-                VR0TBAIwADAdBgNVHQ4EFgQUTtuRHta8KDnjuGzpV8F0c/nApmwwTwYDVR0jBEgw
-                RoAUTtuRHta8KDnjuGzpV8F0c/nApmyhGKQWMBQxEjAQBgNVBAMMCWRlbW8gY2Vy
-                dIIUfImu6HQ145sOn1ra6pYn9KgIQzkwCwYDVR0PBAQDAgXgMGkGA1UdEQRiMGCC
-                GG1wLXBnLWRlbW8ubXAtZGVtby5sb2NhbIIcd3d3Lm1wLXBnLWRlbW8ubXAtZGVt
-                by5sb2NhbIIJbG9jYWxob3N0ghVsb2NhbGhvc3QubG9jYWxkb21haW6HBH8AAAEw
-                EwYDVR0lBAwwCgYIKwYBBQUHAwEwDQYJKoZIhvcNAQELBQADggEBACXhqQlHdnNF
-                XP5rHGBM98PSH7MZeavcQnBF3T4LDgCXeI++ab6sUpFaJAGdx156gd6sLr9OyV5h
-                M2CloNT0omXkJOI1uDAJyqUu9RD47NiLDf6yr9z91t4O1pAu4rcWaaKT/wqVcGda
-                WQ0mBgNgJLW+TwsT7rn93mdkhEIVXqmjhNNd6nfDdgkpozZCSPQkdt8IllKdPvrC
-                Aq4wBlDHzKSIIhnDFa0+1DUnAATY9dREARGQ5SMjFf2j5+k/mrH+vpkSx7QD0rQt
-                Rk5bDe6gVf6E1xl6s8e6Un65xncF7keoDUDHVHs6d16nhdLA2/yOMKSdic2EbfYB
-                8WjXHbt7O9M=
-                -----END CERTIFICATE-----              
+              value:  {{ .Values.keystoreCert | quote }}
           volumeMounts:
             - name: mp-home
               mountPath: /opt/midpoint/var
@@ -221,6 +201,15 @@ spec:
             - name: MP_SMTP_PROTOCOL
               value: {{ .Values.smtpProtocol | quote }}
             {{- end }}
+            - name: MP_PW_DEF
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "midpoint.secretName" . }}
+                  key: keystore-password         
+            - name: MP_KEYSTORE
+              value:  {{ .Values.keystoreFile | quote }}
+            - name: MP_CERT
+              value:  {{ .Values.keystoreCert | quote }}
             - name: MP_PORT_NUMBER
               value: {{ .Values.containerPorts.http | quote }}
             {{- if .Values.minHeapSize }}
