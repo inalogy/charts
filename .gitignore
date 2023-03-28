@@ -20,3 +20,6 @@ lsp
 # Visual Studio Code
 .vscode
 
+mp.yaml
+
+config/*
