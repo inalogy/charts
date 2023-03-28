@@ -97,6 +97,25 @@ spec:
               value:  {{ .Values.keystoreFile | quote }}
             - name: MP_CERT
               value:  {{ .Values.keystoreCert | quote }}
+          {{- if .Values.signstore.enabled }}
+            - name: MP_CREATE_SIGN_STORE
+              value: "true"       
+            - name: MP_SIGN_STOREPW
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "midpoint.secretName" . }}
+                  key: signstore-password         
+            - name: MP_SIGN_KEYSTORE
+              value:  {{ .Values.signstore.file  | quote }}
+            - name: MP_SIGN_ALIAS
+              value:  {{ .Values.signstore.alias | quote }}
+            - name: MP_SIGN_KEY
+              value:  {{ .Values.signstore.key | quote }}
+            - name: MP_SIGN_LEAFCERT
+              value:  {{ .Values.signstore.certificate | quote }}
+            - name: MP_SIGN_CHAINCERT
+              value:  {{ .Values.signstore.chainCertificate | quote }}
+          {{- end }}                   
           volumeMounts:
             - name: mp-home
               mountPath: /opt/midpoint/var
@@ -109,6 +128,10 @@ spec:
             - name: mp-sql
               mountPath: /opt/midpoint/var/extra-sql
           {{- end }}                   
+          {{- if .Values.midpoint.poi.enabled  }}
+            - name: mp-poi
+              mountPath: /opt/midpoint/var/init-poi
+          {{- end }}
           {{- if .Values.configInit.resources }}
           resources: {{- toYaml .Values.configInit.resources | nindent 12 }}
           {{- end }}
@@ -283,10 +306,6 @@ spec:
           {{- if .Values.midpoint.schema.enabled  }}
             - name: mp-schema
               mountPath: /opt/midpoint/var/schema
-          {{- end }}
-          {{- if .Values.midpoint.poi.enabled  }}
-            - name: mp-poi
-              mountPath: /opt/midpoint/var/post-initial-objects
           {{- end }}
           {{- if .Values.extraVolumeMounts }}
           {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumeMounts "context" $) | nindent 12 }}
