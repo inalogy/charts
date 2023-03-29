@@ -11,3 +11,4 @@ config/*
 mp.yaml
 .cache
  
+*.log 
