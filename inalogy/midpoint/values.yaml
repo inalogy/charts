@@ -674,7 +674,7 @@ configInit:
   image:
     registry: docker.io
     repository: inalogy/mpi
-    tag: 0.2.22
+    tag: 0.3.2
     digest: ""
     pullPolicy: IfNotPresent
     ## Optionally specify an array of imagePullSecrets.
