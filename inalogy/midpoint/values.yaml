@@ -209,6 +209,7 @@ midpoint:
     ##
     passwordsSecret: ""
 
+
 ###################################################################################################
 ###################################################################################################
 
@@ -279,7 +280,7 @@ extraEnvVarsSecret: ""
 ## @param replicaCount Number of MidPoint replicas to deploy
 ## NOTE: ReadWriteMany PVC(s) are required if replicaCount > 1
 ##
-replicaCount: 1
+replicaCount: 2
 ## @param containerPorts.http MidPoint HTTP container port
 ## @param containerPorts.elastic MidPoint Elasticsearch container port
 ##
@@ -953,7 +954,7 @@ postgresql:
   persistence:
     ## @param postgresql.persistence.enabled Use PVCs when deploying the PostgreSQL chart
     ##
-    enabled: true
+    enabled: false
     ## @param postgresql.persistence.existingClaim Use an existing PVC when deploying the PostgreSQL chart
     ##
     existingClaim: ""

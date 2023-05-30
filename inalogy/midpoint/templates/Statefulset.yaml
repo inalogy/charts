@@ -1,5 +1,5 @@
-apiVersion: {{ include "common.capabilities.deployment.apiVersion" . }}
-kind: Deployment
+apiVersion: {{ include "common.capabilities.statefulset.apiVersion" . }}
+kind: StatefulSet
 metadata:
   name: {{ include "common.names.fullname" . }}
   namespace: {{ .Release.Namespace | quote }}
@@ -12,9 +12,8 @@ metadata:
   {{- end }}
 spec:
   replicas: {{ .Values.replicaCount }}
-  {{- if .Values.updateStrategy }}
-  strategy: {{- toYaml .Values.updateStrategy | nindent 4 }}
-  {{- end }}
+  serviceName: {{ include "common.names.fullname" . }}
+  updateStrategy: {{- include "common.tplvalues.render" (dict "value" .Values.updateStrategy "context" $ ) | nindent 4 }}
   selector:
     matchLabels: {{- include "common.labels.matchLabels" . | nindent 6 }}
   template:
@@ -174,6 +173,12 @@ spec:
                 secretKeyRef:
                   name: {{ include "midpoint.database.secretName" . }}
                   key: password
+            - name: MP_SET_midpoint_taskManager_clustered
+              value: "true"
+            - name: MP_SET_midpoint_nodeIdSource
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
             - name: MP_SET_midpoint_repository_jdbcUrl
               value: {{ include "midpoint.database.url" . | quote }}
             - name: MP_UNSET_midpoint_repository_hibernateHbm2ddl
@@ -378,7 +383,7 @@ spec:
             name: {{ include "midpoint.configmap" . }}
         - name: mp-extra-connectors
           configMap:
-            name: {{ include "midpoint.configmap.connectors" . }}  
+            name: {{ include "midpoint.configmap.connectors" . }}
         {{- if .Values.extraVolumes }}
         {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumes "context" $) | nindent 8 }}
         {{- end }}
