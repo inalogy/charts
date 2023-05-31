@@ -176,9 +176,9 @@ spec:
             - name: MP_SET_midpoint_taskManager_clustered
               value: "true"
             - name: MP_SET_midpoint_nodeIdSource
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.name
+              value: hostname
+            - name: MP_SET_midppoint_url
+              value: {{ include "common.names.fullname" . }}
             - name: MP_SET_midpoint_repository_jdbcUrl
               value: {{ include "midpoint.database.url" . | quote }}
             - name: MP_UNSET_midpoint_repository_hibernateHbm2ddl

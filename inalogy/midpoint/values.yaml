@@ -73,7 +73,7 @@ diagnosticMode:
 image:
   registry: docker.io
   repository: inalogy/midpoint
-  tag: 4.6-support
+  tag: 4.6.1.6
   digest: ""
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -632,7 +632,7 @@ ingress:
 persistence:
   ## @param persistence.enabled Enable persistence using Persistent Volume Claims
   ##
-  enabled: false
+  enabled: true
   ## @param persistence.storageClass Persistent Volume storage class
   ## If defined, storageClassName: <storageClass>
   ## If set to "-", storageClassName: "", which disables dynamic provisioning
@@ -954,7 +954,7 @@ postgresql:
   persistence:
     ## @param postgresql.persistence.enabled Use PVCs when deploying the PostgreSQL chart
     ##
-    enabled: false
+    enabled: true
     ## @param postgresql.persistence.existingClaim Use an existing PVC when deploying the PostgreSQL chart
     ##
     existingClaim: ""
