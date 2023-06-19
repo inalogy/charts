@@ -118,7 +118,7 @@ midpointEmail: midpoint@example.com
 #
 #  Tobe Documented & Refactored #
 
-## KeyStore onfiguration
+## KeyStore configuration
 ## ref: https://docs.evolveum.com/midpoint/reference/security/crypto/keystore-configuration/
 ## @param keystorePassword password for midpoint JKS keystore
 ## @param smtpPassword SMTP user password
@@ -538,7 +538,7 @@ ingress:
   ingressClassName: ""
   ## @param ingress.hostname Default host for the ingress record
   ##
-  hostname: gcp-mp-1.inalogy.com
+  hostname: mp-tst.inalogy.com
   ## @param ingress.path Default path for the ingress record
   ## NOTE: You may need to set this to '/*' in order to use this with ALB ingress controllers
   ##
@@ -638,7 +638,17 @@ persistence:
   ## If set to "-", storageClassName: "", which disables dynamic provisioning
   ## If undefined (the default) or set to null, no storageClassName spec is set, choosing the default provisioner
   ##
-  storageClass: ""
+  storageClass:
+    create: false
+    name: ""
+    provisioner: ""
+    mountoptions:
+      dir_mode: ""
+      file_mode: ""
+      uid: ""
+      gid: ""
+    parameters:
+      skuName: ""
   ## @param persistence.accessModes [array] Persistent Volume access modes
   ##
   accessModes:

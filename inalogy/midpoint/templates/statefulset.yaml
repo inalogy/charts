@@ -91,19 +91,19 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ include "midpoint.secretName" . }}
-                  key: keystore-password         
+                  key: keystore-password
             - name: MP_KEYSTORE
               value:  {{ .Values.keystoreFile | quote }}
             - name: MP_CERT
               value:  {{ .Values.keystoreCert | quote }}
           {{- if .Values.signstore.enabled }}
             - name: MP_CREATE_SIGN_STORE
-              value: "true"       
+              value: "true"
             - name: MP_SIGN_STOREPW
               valueFrom:
                 secretKeyRef:
                   name: {{ include "midpoint.secretName" . }}
-                  key: signstore-password         
+                  key: signstore-password
             - name: MP_SIGN_KEYSTORE
               value:  {{ .Values.signstore.file  | quote }}
             - name: MP_SIGN_ALIAS
@@ -114,19 +114,19 @@ spec:
               value:  {{ .Values.signstore.certificate | quote }}
             - name: MP_SIGN_CHAINCERT
               value:  {{ .Values.signstore.chainCertificate | quote }}
-          {{- end }}                   
+          {{- end }}
           volumeMounts:
             - name: mp-home
               mountPath: /opt/midpoint/var
           {{- if .Values.midpoint.additionalConnectors.enabled }}
             - name: mp-extra-connectors
-              mountPath: /opt/midpoint/var/connectors.download  
+              mountPath: /opt/midpoint/var/connectors.download
               subPath: connectors.download
-          {{- end }}                   
+          {{- end }}
           {{- if .Values.midpoint.sql.enabled  }}
             - name: mp-sql
               mountPath: /opt/midpoint/var/extra-sql
-          {{- end }}                   
+          {{- end }}
           {{- if .Values.midpoint.poi.enabled  }}
             - name: mp-poi
               mountPath: /opt/midpoint/var/init-poi
